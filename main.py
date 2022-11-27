@@ -7,10 +7,8 @@ import streamlit as st
 from dataset import dino
 import dfprint
 
-
 def text_from_pd(pd_cell):
     return pd_cell.to_string().split(" ")[-1]
-
 
 non_0_size_dinos = dino[dino["length"] != 0]
 
@@ -18,7 +16,6 @@ st.set_page_config(layout="wide")
 
 bg_image = '<style> .stApp {background-image: url("https://raw.githubusercontent.com/Ilillill/projects/main/dinologo_match.png");background-position: 95% 10%; background-repeat: no-repeat; background-size: 300px 300px;} </style>'
 st.markdown(bg_image, unsafe_allow_html=True)
-
 
 with st.sidebar:
     st.title("DINOSAURS!")
@@ -70,7 +67,7 @@ st.write(f"**{len(species_kp['name'])}** of known species were present during th
 st.write(species_kp)
 
 st.subheader("All dinosaurs timeline & sizes")
-fig_all = px.scatter(non_0_size_dinos, x=non_0_size_dinos["period_to"], y=non_0_size_dinos["length"], size=non_0_size_dinos["length"], color="name")
+fig_all = px.scatter(non_0_size_dinos, x=non_0_size_dinos["period_to"], y=non_0_size_dinos["length"], size=non_0_size_dinos["length"], color="name", labels={"name": "Species", "period_to": "Mln years ago", "length": "Size"})
 fig_all.update_xaxes(autorange="reversed")
 st.plotly_chart(fig_all)
 
