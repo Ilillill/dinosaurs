@@ -14,17 +14,16 @@ def run_once_add_image_column():
         image_page = response.text
         dino_soup = BeautifulSoup(image_page, "html.parser")
         return dino_soup.find("img", {"class": "dinosaur--image"})["src"]
+    def app_image(link):
+        try:
+            return get_image(str(link))
+        except TypeError:
+            return pd.NA
     import requests
     from bs4 import BeautifulSoup
     dino_no_images = pd.read_csv("./dino.csv")
-    list_images = []
-    for lnk in dino_no_images["link"]:
-        try:
-            list_images.append(get_image(str(lnk)))
-        except TypeError:
-            list_images.append("")
-    dino_no_images["image"] = list_images
-    dino_no_images.to_csv("./dino_updated.csv")
+    dino_no_images["image"] = dino_no_images["link"].apply(app_image)
+    dino_no_images.to_csv("./dino_updated2.csv")
 # run_once_add_image_column()
 
 ####################################################################################################
@@ -35,7 +34,7 @@ def run_once_add_image_column():
 dino = pd.read_csv("./dino_updated.csv", index_col=0)
 dino.dropna(subset=["image"], inplace=True)
 
-''' LIVED_IN COLUMN - REMOVE NAN '''
+''' LIVED_IN COLUMN - REMOVE NA '''
 dino.dropna(subset=["lived_in"], inplace=True)
 
 ''' CREATE "DISCOVERED" COLUMN FROM NAMED_BY '''

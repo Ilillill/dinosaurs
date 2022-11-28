@@ -21,6 +21,8 @@ with st.sidebar:
     st.title("DINOSAURS!")
     dino_selector = st.selectbox("Select dinosaur or start typing to search:", dino["name"].unique(), index=3)
     selected_dino = dino.loc[dino["name"] == dino_selector]
+    if st.button("Or pick randomly"):
+        selected_dino = dino.sample(n=1)
     selected_dino_image = selected_dino["image"].to_string().split(" ")[-1]
     pd.set_option('display.max_colwidth', None)
     st.image(selected_dino_image)
@@ -31,7 +33,6 @@ with st.sidebar:
     st.write(f"Discovered: {text_from_pd(selected_dino['lived_in'])}, {text_from_pd(selected_dino['discovered'])}")
     st.markdown(text_from_pd(selected_dino["link"]))
     st.subheader("Size comparison:")
-
     fig_size_comparison = px.timeline(selected_dino, x_start=selected_dino["length"]-selected_dino["length"], x_end=selected_dino["length"], height=175)
     fig_size_comparison.update_layout(yaxis={'visible': False}, xaxis={"type": "linear"})
     fig_size_comparison.data[0].x = selected_dino["length"].tolist()
@@ -49,7 +50,6 @@ with st.container():
         st.markdown(f"<h1 style='text-align: center;'>{dino_time}</h1><h6 style='text-align: center;'>Mln years range</h6>", unsafe_allow_html=True)
     with lbl3:
         st.markdown(f"<h1 style='text-align: center;'>{dino.nunique()['major_group']}</h1><h6 style='text-align: center;'>Groups</h6>", unsafe_allow_html=True)
-
 
 st.markdown("---")
 
@@ -91,10 +91,7 @@ with st.container():
 
 
 st.subheader("Major groups timeline")
-major_group_ranges = dino.groupby("major_group")
-major_group_ranges_max = major_group_ranges.max()["period_from"]
-major_group_ranges_min = major_group_ranges.min()["period_to"]
-major_group_ranges = pd.concat([major_group_ranges_min, major_group_ranges_max], axis=1).reset_index()
+major_group_ranges = dino.groupby("major_group").agg({"period_to": "min", "period_from": "max"}).reset_index()
 major_group_ranges["delta"] = major_group_ranges["period_to"] - major_group_ranges["period_from"]
 fig_timeline = px.timeline(major_group_ranges, x_start="period_from", x_end="period_to", y="major_group", text="major_group", labels={"major_group": "Major group", "period_from": "From (mln years ago)", "period_to": "To (mln years ago)"})
 fig_timeline.update_layout(xaxis_title="MLN years ago", yaxis={'visible': False}, xaxis={"type": "linear"})
@@ -113,7 +110,6 @@ if st.checkbox("Show number of species"):
     color_setting = group_diversity["species"]
 fig_gr_loc = px.choropleth(group_diversity, locations=group_diversity["lived_in"], color=color_setting, locationmode="country names", labels={"lived_in": "Location", "species": f"Species of {group_selector} discovered"})
 st.plotly_chart(fig_gr_loc)
-
 
 if st.checkbox("Show dinosaurs in this group"):
     chunks = [selected_group["image"].iloc[x:x+5] for x in range(0, len(selected_group), 5)]

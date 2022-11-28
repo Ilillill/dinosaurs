@@ -1,5 +1,5 @@
-dataset_before = '''Int64Index: 309 entries, 0 to 308
-Data columns (total 11 columns):
+dataset_before = '''RangeIndex: 309 entries, 0 to 308
+Data columns (total 10 columns):
  #   Column    Non-Null Count  Dtype 
 ---  ------    --------------  ----- 
  0   name      309 non-null    object
@@ -12,8 +12,7 @@ Data columns (total 11 columns):
  7   named_by  309 non-null    object
  8   species   304 non-null    object
  9   link      309 non-null    object
- 10  image     308 non-null    object
-dtypes: object(11)
+dtypes: object(10)
 '''
 
 dataset_after = '''Int64Index: 300 entries, 0 to 308
