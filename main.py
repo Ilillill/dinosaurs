@@ -161,9 +161,8 @@ with st.container():
         st.plotly_chart(scatter_location(dino_locations_cretaceous, "Cretaceous"))
 
 sc_list = ['World', 'Africa', 'Asia', 'Europe', 'North America', 'South America']
-area_selector = st.selectbox("Select area", sc_list)
-fig_areas = px.choropleth(dino_locations, locations="lived_in", locationmode="country names", color="name", scope=area_selector.lower(), labels={"lived_in": "Location", "name": "Species discovered"})
-st.plotly_chart(fig_areas)
+area_selector = st.selectbox("Mesozoic Era, select area:", sc_list)
+st.plotly_chart(px.choropleth(dino_locations, locations="lived_in", locationmode="country names", color="name", scope=area_selector.lower(), labels={"lived_in": "Location", "name": "Species discovered"}))
 
 st.markdown("---")
 
