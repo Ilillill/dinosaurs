@@ -163,7 +163,7 @@ st.markdown(f"<h1 style='text-align: center;'>Size</h1>", unsafe_allow_html=True
 average_dinosaur = non_0_size_dinos["length"].mean()
 st.write(f"AVERAGE DINOSAUR: {np.round(average_dinosaur, 1)}m")
 
-largest_dinosaur = dino["length"].max()
+largest_dinosaur = non_0_size_dinos["length"].max()
 largest_dinosaur_df = dino[dino["length"] == largest_dinosaur]
 st.write(f"LARGEST DINOSAUR: {largest_dinosaur}m")
 st.write(largest_dinosaur_df)
@@ -184,6 +184,14 @@ largest_dromaeosaur = dromaeosaurs["length"].max()
 largest_dromaeosaur_df = dromaeosaurs[dromaeosaurs["length"] == largest_dromaeosaur]
 st.write(f"LARGEST DROMAEOSAUR {largest_dromaeosaur}m:")
 st.write(largest_dromaeosaur_df)
+
+st.subheader("Filter dinosaurs by size")
+size_slider = st.slider(label="Size range", min_value=0, max_value=int(largest_dinosaur), value=10, step=1)
+dino_by_size = non_0_size_dinos[non_0_size_dinos["length"].between(size_slider, size_slider+0.99)]
+if dino_by_size.empty:
+    st.write(f"There are no know {size_slider}m long dinosaurs")
+else:
+    st.write(dino_by_size)
 
 st.subheader("Dinosaur sizes for each major group")
 families_grouped = non_0_size_dinos.groupby("major_group")
