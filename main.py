@@ -17,7 +17,7 @@ non_0_size_dinos = dino[dino["length"] != 0]
 
 st.set_page_config(layout="wide", page_title="Dinosaurs", page_icon="🦖")
 
-bg_image = '<style> .stApp {background-image: url("https://raw.githubusercontent.com/Ilillill/projects/main/dinologo_match.png");background-position: 95% 10%; background-repeat: no-repeat; background-size: 300px 300px;} </style>'
+bg_image = '<style> .stApp {background-image: url("https://raw.githubusercontent.com/Ilillill/projects/main/dinologo_match_light.png");background-position: 95% 10%; background-repeat: no-repeat; background-size: 100px 100px;} </style>'
 st.markdown(bg_image, unsafe_allow_html=True)
 
 with st.sidebar:
