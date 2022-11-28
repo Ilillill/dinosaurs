@@ -2,10 +2,13 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import streamlit as st
 
 from dataset import dino
 import dfprint
+
+# LIVE VERSION OF THIS PROJECT CAN BE FOUND @ https://ilillill-dinosaurs-main-91zl3w.streamlit.app/
 
 def text_from_pd(pd_cell):
     return pd_cell.to_string().split(" ")[-1]
@@ -146,6 +149,7 @@ dino_locations_cretaceous = dino_cretaceous.groupby("lived_in").count().reset_in
 with st.container():
     c1_col1, c1_col2 = st.columns(2)
     with c1_col1:
+
         st.plotly_chart(scatter_location(dino_locations, "Entire Mesozoic"))
     with c1_col2:
         st.plotly_chart(scatter_location(dino_locations_triassic, "Triassic"))
@@ -155,6 +159,11 @@ with st.container():
         st.plotly_chart(scatter_location(dino_locations_jurassic, "Jurassic"))
     with c2_col2:
         st.plotly_chart(scatter_location(dino_locations_cretaceous, "Cretaceous"))
+
+sc_list = ['World', 'Africa', 'Asia', 'Europe', 'North America', 'South America']
+area_selector = st.selectbox("Select area", sc_list)
+fig_areas = px.choropleth(dino_locations, locations="lived_in", locationmode="country names", color="name", scope=area_selector.lower(), labels={"lived_in": "Location", "name": "Species discovered"})
+st.plotly_chart(fig_areas)
 
 st.markdown("---")
 
@@ -186,7 +195,7 @@ st.write(f"LARGEST DROMAEOSAUR {largest_dromaeosaur}m:")
 st.write(largest_dromaeosaur_df)
 
 st.subheader("Filter dinosaurs by size")
-size_slider = st.slider(label="Size range", min_value=0, max_value=int(largest_dinosaur), value=10, step=1)
+size_slider = st.slider(label="Size in meters", min_value=0, max_value=int(largest_dinosaur), value=10, step=1)
 dino_by_size = non_0_size_dinos[non_0_size_dinos["length"].between(size_slider, size_slider+0.99)]
 if dino_by_size.empty:
     st.write(f"There are no know {size_slider}m long dinosaurs")

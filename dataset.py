@@ -39,7 +39,7 @@ dino.dropna(subset=["lived_in"], inplace=True)
 
 ''' CREATE "DISCOVERED" COLUMN FROM NAMED_BY '''
 dino["discovered"] = dino["named_by"].str.extract(r"(\d{4})")  # use regex to match date from "named_by" string and add it to a new column
-dino["discovered"] = pd.to_numeric(dino["discovered"], errors="coerce")  # Convert to numeric values and mark non convertable string as NaN
+dino["discovered"] = pd.to_numeric(dino["discovered"], errors="coerce")  # Convert to numeric values and mark non convertible string as NaN
 dino.dropna(subset=["discovered"], inplace=True)  # Remove NaN
 dino["discovered"] = dino["discovered"].astype(int)  # Convert values to integer
 
