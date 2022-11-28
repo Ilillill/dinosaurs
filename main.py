@@ -2,16 +2,12 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import streamlit as st
 
 from dataset import dino
 import dfprint
 
 # LIVE VERSION OF THIS PROJECT CAN BE FOUND @ https://ilillill-dinosaurs-main-91zl3w.streamlit.app/
-
-def text_from_pd(pd_cell):
-    return pd_cell.to_string().split(" ")[-1]
 
 non_0_size_dinos = dino[dino["length"] != 0]
 
@@ -29,12 +25,12 @@ with st.sidebar:
     selected_dino_image = selected_dino["image"].to_string().split(" ")[-1]
     pd.set_option('display.max_colwidth', None)
     st.image(selected_dino_image)
-    st.write(f"Name: {text_from_pd(selected_dino['name']).capitalize()} {text_from_pd(selected_dino['species']).capitalize()}")
-    st.write(f"Type: {text_from_pd(selected_dino['diet']).capitalize()} {text_from_pd(selected_dino['type']).capitalize()}")
-    st.write(f"Size: {text_from_pd(selected_dino['length'])}m")
-    st.write(f"Period: {text_from_pd(selected_dino['period']).capitalize()} ({text_from_pd(selected_dino['period_from'])} - {text_from_pd(selected_dino['period_to'])} mln years ago)")
-    st.write(f"Discovered: {text_from_pd(selected_dino['lived_in'])}, {text_from_pd(selected_dino['discovered'])}")
-    st.markdown(text_from_pd(selected_dino["link"]))
+    st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
+    st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
+    st.write(f"Size: {selected_dino['length'].iloc[0]}m")
+    st.write(f"Period: {selected_dino['period'].iloc[0].capitalize()} ({selected_dino['period_from'].iloc[0]} - {selected_dino['period_to'].iloc[0]} mln years ago)")
+    st.write(f"Discovered: {selected_dino['lived_in'].iloc[0]}, {selected_dino['discovered'].iloc[0]}")
+    st.markdown(selected_dino["link"].iloc[0])
     st.subheader("Size comparison:")
     fig_size_comparison = px.timeline(selected_dino, x_start=selected_dino["length"]-selected_dino["length"], x_end=selected_dino["length"], height=175)
     fig_size_comparison.update_layout(yaxis={'visible': False}, xaxis={"type": "linear"})
@@ -61,7 +57,7 @@ st.markdown(f"<h1 style='text-align: center;'>Timeline</h1>", unsafe_allow_html=
 st.write(f"Non-avian dinosaurs existed for **{dino_time} million** years.")
 
 oldest_fossil = dino["period_from"].max()
-oldest_fossil_df = dino[dino["period_from"] == oldest_fossil]  # dino.iloc[dino["period_from"].idxmax()] was returning only one entry
+oldest_fossil_df = dino[dino["period_from"] == oldest_fossil]  # dino.iloc[dino["period_from"].idxmax()] returns only one entry
 st.write(f"The oldest fossils are **{oldest_fossil} mln** years old:")
 st.write(oldest_fossil_df)
 
@@ -124,7 +120,7 @@ if st.checkbox("Show dinosaurs in this group"):
             for ch in chunk:
                 with col[i]:
                     st.image(ch, width=150)
-                    st.write(text_from_pd(dino["name"].loc[dino["image"] == ch]).capitalize())
+                    st.write(dino["name"].loc[dino["image"] == ch].iloc[0].capitalize())
                     i += 1
 
 st.markdown("---")

@@ -14,16 +14,18 @@ def run_once_add_image_column():
         image_page = response.text
         dino_soup = BeautifulSoup(image_page, "html.parser")
         return dino_soup.find("img", {"class": "dinosaur--image"})["src"]
+
     def app_image(link):
         try:
             return get_image(str(link))
         except TypeError:
             return pd.NA
+
     import requests
     from bs4 import BeautifulSoup
     dino_no_images = pd.read_csv("./dino.csv")
     dino_no_images["image"] = dino_no_images["link"].apply(app_image)
-    dino_no_images.to_csv("./dino_updated2.csv")
+    dino_no_images.to_csv("./dino_updated.csv")
 # run_once_add_image_column()
 
 ####################################################################################################
@@ -38,25 +40,25 @@ dino.dropna(subset=["image"], inplace=True)
 dino.dropna(subset=["lived_in"], inplace=True)
 
 ''' CREATE "DISCOVERED" COLUMN FROM NAMED_BY '''
-dino["discovered"] = dino["named_by"].str.extract(r"(\d{4})")  # use regex to match date from "named_by" string and add it to a new column
-dino["discovered"] = pd.to_numeric(dino["discovered"], errors="coerce")  # Convert to numeric values and mark non convertible string as NaN
-dino.dropna(subset=["discovered"], inplace=True)  # Remove NaN
-dino["discovered"] = dino["discovered"].astype(int)  # Convert values to integer
+dino["discovered"] = dino["named_by"].str.extract(r"(\d{4})")
+dino["discovered"] = pd.to_numeric(dino["discovered"], errors="coerce")
+dino.dropna(subset=["discovered"], inplace=True)
+dino["discovered"] = dino["discovered"].astype(int)
 
 ''' TIDY UP NAMED_BY '''
-dino["named_by"].replace((r"(\d{4})", "\\(", "\\)"), "", regex=True, inplace=True)  # Remove date and brackets
+dino["named_by"].replace((r"(\d{4})", "\\(", "\\)"), "", regex=True, inplace=True)
 dino["named_by"] = dino["named_by"].str.strip()
 
 ''' CLEAN LENGTH & CONVERT TO INT'''
-dino["length"].fillna(0.0, inplace=True)  # Replace NaN with 0.0
-dino["length"].replace("m", "", regex=True, inplace=True)  # Remove 'm' for meters
-dino["length"] = dino["length"].astype(float)  # Convert data to float
+dino["length"].fillna(0.0, inplace=True)
+dino["length"].replace("m", "", regex=True, inplace=True)
+dino["length"] = dino["length"].astype(float)
 
 ''' SPECIES COLUMN '''
-dino.fillna({"species": dino["name"]}, inplace=True)  # If species NaN replace it with name
+dino.fillna({"species": dino["name"]}, inplace=True)
 
 ''' CHECK TYPES AND FIX ERRORS '''
-dino.loc[dino["type"] == "1.0m", ["type"]] = "euornithopod"  # set the correct type
+dino.loc[dino["type"] == "1.0m", ["type"]] = "euornithopod"
 
 ''' CREATE MAJOR_GROUPS COLUMN FROM TAXONOMY '''
 major_groups_list = ["Herrerasauridae", "Guaibasauridae", "Plateosauridae", "Riojasauridae", "Massospondyildae", "Vulcanodontidae", "Turiasauria", "Cetiosauridae",
@@ -67,10 +69,10 @@ major_groups_list = ["Herrerasauridae", "Guaibasauridae", "Plateosauridae", "Rio
 
 for m_g in major_groups_list:
     dino.loc[dino["taxonomy"].str.contains(m_g), "major_group"] = m_g
-dino.fillna({"major_group": "Other"}, inplace=True)  # Create Other group from invalid entries
+dino.fillna({"major_group": "Other"}, inplace=True)  # Create 'Other' group from invalid entries
 
 ''' PERIOD COLUMN '''
-dino["period"].replace(" million years ago", "", regex=True, inplace=True)  # remove unnecessary text
+dino["period"].replace(" million years ago", "", regex=True, inplace=True)
 
 ''' CREATE PERIOD_FROM and PERIOD_TO COLUMNS'''
 periods = dino["period"].str.findall(r"(\d+)")  # Find all from - to ranges in periods column
