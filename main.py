@@ -68,7 +68,7 @@ st.write(species_kp)
 st.subheader("All dinosaurs timeline & sizes")
 fig_all = px.scatter(non_0_size_dinos, x=non_0_size_dinos["period_to"], y=non_0_size_dinos["length"], size=non_0_size_dinos["length"], color="name", labels={"name": "Species", "period_to": "Mln years ago", "length": "Size"})
 fig_all.update_xaxes(autorange="reversed")
-st.plotly_chart(fig_all)
+st.plotly_chart(fig_all, use_container_width=True)
 
 st.markdown("---")
 
@@ -81,7 +81,7 @@ with st.container():
         if st.checkbox("Show species in groups"):
             fig_gr = px.sunburst(dino, path=["type", "major_group", "name"], template="presentation")
 
-        st.plotly_chart(fig_gr)
+        st.plotly_chart(fig_gr, use_container_width=True)
     with gr_col2:
         groups = dino["major_group"].value_counts().reset_index()
         groups = groups.rename(columns={"index": "Group", "major_group": "Species"})
@@ -96,7 +96,7 @@ fig_timeline = px.timeline(major_group_ranges, x_start="period_from", x_end="per
 fig_timeline.update_layout(xaxis_title="MLN years ago", yaxis={'visible': False}, xaxis={"type": "linear"})
 fig_timeline.update_xaxes(autorange="reversed")
 fig_timeline.data[0].x = major_group_ranges.delta.tolist()
-st.plotly_chart(fig_timeline)
+st.plotly_chart(fig_timeline, use_container_width=True)
 
 st.subheader("Major groups distribution")
 group_selector = st.selectbox("Select group or start typing to search:", dino["major_group"].unique())
@@ -108,7 +108,7 @@ st.write(f"{group_selector}: {len(dino[dino['major_group'] == group_selector])} 
 if st.checkbox("Show number of species"):
     color_setting = group_diversity["species"]
 fig_gr_loc = px.choropleth(group_diversity, locations=group_diversity["lived_in"], color=color_setting, locationmode="country names", labels={"lived_in": "Location", "species": f"Species of {group_selector} discovered"})
-st.plotly_chart(fig_gr_loc)
+st.plotly_chart(fig_gr_loc, use_container_width=True)
 
 if st.checkbox("Show dinosaurs in this group"):
     chunks = [selected_group["image"].iloc[x:x+5] for x in range(0, len(selected_group), 5)]
@@ -150,28 +150,28 @@ if st.checkbox("Show heatmap"):
     with st.container():
         c1_col1, c1_col2 = st.columns(2)
         with c1_col1:
-            st.plotly_chart(heatmap_location(dino_locations, "Entire Mesozoic"))
+            st.plotly_chart(heatmap_location(dino_locations, "Entire Mesozoic"), use_container_width=True)
         with c1_col2:
-            st.plotly_chart(heatmap_location(dino_locations_triassic, "Triassic"))
+            st.plotly_chart(heatmap_location(dino_locations_triassic, "Triassic"), use_container_width=True)
     with st.container():
         c2_col1, c2_col2 = st.columns(2)
         with c2_col1:
-            st.plotly_chart(heatmap_location(dino_locations_jurassic, "Jurassic"))
+            st.plotly_chart(heatmap_location(dino_locations_jurassic, "Jurassic"), use_container_width=True)
         with c2_col2:
-            st.plotly_chart(heatmap_location(dino_locations_cretaceous, "Cretaceous"))
+            st.plotly_chart(heatmap_location(dino_locations_cretaceous, "Cretaceous"), use_container_width=True)
 else:
     with st.container():
         c1_col1, c1_col2 = st.columns(2)
         with c1_col1:
-            st.plotly_chart(scatter_location(dino_locations, "Entire Mesozoic"))
+            st.plotly_chart(scatter_location(dino_locations, "Entire Mesozoic"), use_container_width=True)
         with c1_col2:
-            st.plotly_chart(scatter_location(dino_locations_triassic, "Triassic"))
+            st.plotly_chart(scatter_location(dino_locations_triassic, "Triassic"), use_container_width=True)
     with st.container():
         c2_col1, c2_col2 = st.columns(2)
         with c2_col1:
-            st.plotly_chart(scatter_location(dino_locations_jurassic, "Jurassic"))
+            st.plotly_chart(scatter_location(dino_locations_jurassic, "Jurassic"), use_container_width=True)
         with c2_col2:
-            st.plotly_chart(scatter_location(dino_locations_cretaceous, "Cretaceous"))
+            st.plotly_chart(scatter_location(dino_locations_cretaceous, "Cretaceous"), use_container_width=True)
 
 st.markdown("---")
 
@@ -223,21 +223,21 @@ fig_sizes = go.Figure()
 fig_sizes.add_traces(bar_largest)
 fig_sizes.add_traces(bar_average)
 fig_sizes.add_traces(bar_smallest)
-st.plotly_chart(fig_sizes)
+st.plotly_chart(fig_sizes, use_container_width=True)
 
 st.subheader("Timeline of average sauropod sizes")
 sauropods = non_0_size_dinos[non_0_size_dinos["taxonomy"].str.contains('Sauropodomorpha')].groupby("period_to")
 fig_sauropods = px.line(sauropods, x=sauropods["period_to"].max(), y=sauropods["length"].mean(), labels={'x': 'Mln years ago', "y": "Average sauropod size"}, line_shape="spline")
 fig_sauropods.update_layout(showlegend=False)
 fig_sauropods.update_xaxes(autorange="reversed")
-st.plotly_chart(fig_sauropods)
+st.plotly_chart(fig_sauropods, use_container_width=True)
 st.write("I was trying to find out if we would still have large sauropods if the extinction never happened. The chart doesn't indicate their sizes were really dropping towards the end of Cretaceous, but rather that their sizes were fluctuating every xx mln years.")
 
 st.subheader("How T-rexes size compared to other large carnivores?")
 theropods = non_0_size_dinos[non_0_size_dinos["type"] == "large theropod"].sort_values("length")
 fig_trex = px.bar(theropods[-10:], x="name", y="length")
 fig_trex["data"][0]["marker"]["color"] = ["red" if fig_data == "tyrannosaurus" else "#636efa" for fig_data in fig_trex["data"][0]["x"]]  # print(fig_trex) # print(fig_trex["data"][0]["marker"]["color"])  #636efa
-st.plotly_chart(fig_trex)
+st.plotly_chart(fig_trex, use_container_width=True)
 
 st.markdown("---")
 
@@ -256,21 +256,21 @@ dino_diversity = dino_diversity.rename(columns={"period_to": "Fossils age", 0: "
 fig_diversity = px.scatter(dino_diversity, x="Fossils age", y="Number of species", text="Number of species", size="Number of species", size_max=50, color="Number of species")
 fig_diversity.update_xaxes(autorange="reversed")
 fig_diversity.update_layout(xaxis_title="MLN years ago", yaxis_title="Number of species", showlegend=False)
-st.plotly_chart(fig_diversity)
+st.plotly_chart(fig_diversity, use_container_width=True)
 
 st.subheader("Number of new species discovered by year")
 dino_discoveries = dino.value_counts("discovered").reset_index()
 dino_discoveries = dino_discoveries.rename(columns={"discovered": "Year", 0: "Species"})
 fig_discoveries = px.bar(dino_discoveries, x="Year", y="Species", color="Species")
 fig_discoveries.update_layout(xaxis_title="Year", yaxis_title="Number of discoveries")
-st.plotly_chart(fig_discoveries)
+st.plotly_chart(fig_discoveries, use_container_width=True)
 
 st.markdown("---")
 
 st.markdown(f"<h1 style='text-align: center;'>About the dataset</h1>", unsafe_allow_html=True)
 
 with st.expander("DISPLAY DATA", expanded=False):
-    st.dataframe(dino, use_container_width=True)
+    st.dataframe(dino)
 
 with st.expander("INFO", expanded=False):
     st.write('DATASET SOURCE: https://github.com/kjanjua26/jurassic-park | https://www.kaggle.com/datasets/kjanjua/jurassic-park-the-exhaustive-dinosaur-dataset')
