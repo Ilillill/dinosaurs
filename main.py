@@ -22,9 +22,9 @@ st.markdown(bg_image, unsafe_allow_html=True)
 
 with st.sidebar:
     st.title("DINOSAURS!")
-    dino_selector = st.selectbox("Select dinosaur or start typing to search:", dino["name"].unique(), index=3)
+    dino_selector = st.selectbox("Select species or start typing to search:", dino["name"].unique(), index=3)
     selected_dino = dino.loc[dino["name"] == dino_selector]
-    if st.button("Or pick randomly"):
+    if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
     selected_dino_image = selected_dino["image"].to_string().split(" ")[-1]
     pd.set_option('display.max_colwidth', None)
@@ -134,6 +134,10 @@ def scatter_location(selection, title):
     return px.scatter_geo(selection, locations="lived_in", locationmode="country names", color="lived_in", size="species", text="species", size_max=50, labels={"lived_in": "Location", "species": "Species discovered"}, title=title)
 
 
+def heatmap_location(selection, title):
+    return px.choropleth(selection, locations="lived_in", locationmode="country names", color="name", labels={"lived_in": "Location", "name": "Species discovered"}, title=title)
+
+
 st.markdown(f"<h1 style='text-align: center;'>Species diversity</h1>", unsafe_allow_html=True)
 
 st.write(f"Dinosaurs were discovered in {dino['lived_in'].nunique()} countries: {', '.join(dino['lived_in'].unique())}")
@@ -146,23 +150,32 @@ dino_locations_jurassic = dino_jurassic.groupby("lived_in").count().reset_index(
 dino_cretaceous = dino[dino["period"].str.contains('Cretaceous')]
 dino_locations_cretaceous = dino_cretaceous.groupby("lived_in").count().reset_index()
 
-with st.container():
-    c1_col1, c1_col2 = st.columns(2)
-    with c1_col1:
-
-        st.plotly_chart(scatter_location(dino_locations, "Entire Mesozoic"))
-    with c1_col2:
-        st.plotly_chart(scatter_location(dino_locations_triassic, "Triassic"))
-with st.container():
-    c2_col1, c2_col2 = st.columns(2)
-    with c2_col1:
-        st.plotly_chart(scatter_location(dino_locations_jurassic, "Jurassic"))
-    with c2_col2:
-        st.plotly_chart(scatter_location(dino_locations_cretaceous, "Cretaceous"))
-
-sc_list = ['World', 'Africa', 'Asia', 'Europe', 'North America', 'South America']
-area_selector = st.selectbox("Mesozoic Era, select area:", sc_list)
-st.plotly_chart(px.choropleth(dino_locations, locations="lived_in", locationmode="country names", color="name", scope=area_selector.lower(), labels={"lived_in": "Location", "name": "Species discovered"}))
+if st.checkbox("Show heatmap"):
+    with st.container():
+        c1_col1, c1_col2 = st.columns(2)
+        with c1_col1:
+            st.plotly_chart(heatmap_location(dino_locations, "Entire Mesozoic"))
+        with c1_col2:
+            st.plotly_chart(heatmap_location(dino_locations_triassic, "Triassic"))
+    with st.container():
+        c2_col1, c2_col2 = st.columns(2)
+        with c2_col1:
+            st.plotly_chart(heatmap_location(dino_locations_jurassic, "Jurassic"))
+        with c2_col2:
+            st.plotly_chart(heatmap_location(dino_locations_cretaceous, "Cretaceous"))
+else:
+    with st.container():
+        c1_col1, c1_col2 = st.columns(2)
+        with c1_col1:
+            st.plotly_chart(scatter_location(dino_locations, "Entire Mesozoic"))
+        with c1_col2:
+            st.plotly_chart(scatter_location(dino_locations_triassic, "Triassic"))
+    with st.container():
+        c2_col1, c2_col2 = st.columns(2)
+        with c2_col1:
+            st.plotly_chart(scatter_location(dino_locations_jurassic, "Jurassic"))
+        with c2_col2:
+            st.plotly_chart(scatter_location(dino_locations_cretaceous, "Cretaceous"))
 
 st.markdown("---")
 
@@ -199,6 +212,7 @@ dino_by_size = non_0_size_dinos[non_0_size_dinos["length"].between(size_slider, 
 if dino_by_size.empty:
     st.write(f"There are no know {size_slider}m long dinosaurs")
 else:
+    st.write(f"{len(dino_by_size)} species found with sizes between {size_slider}m and {size_slider+1}m:")
     st.write(dino_by_size)
 
 st.subheader("Dinosaur sizes for each major group")
@@ -223,7 +237,7 @@ fig_sauropods.update_xaxes(autorange="reversed")
 st.plotly_chart(fig_sauropods)
 st.write("I was trying to find out if we would still have large sauropods if the extinction never happened. The chart doesn't indicate their sizes were really dropping towards the end of Cretaceous, but rather that their sizes were fluctuating every xx mln years.")
 
-st.subheader("How T-rexes size compared to other carnivores?")
+st.subheader("How T-rexes size compared to other large carnivores?")
 theropods = non_0_size_dinos[non_0_size_dinos["type"] == "large theropod"].sort_values("length")
 fig_trex = px.bar(theropods[-10:], x="name", y="length")
 fig_trex["data"][0]["marker"]["color"] = ["red" if fig_data == "tyrannosaurus" else "#636efa" for fig_data in fig_trex["data"][0]["x"]]  # print(fig_trex) # print(fig_trex["data"][0]["marker"]["color"])  #636efa
