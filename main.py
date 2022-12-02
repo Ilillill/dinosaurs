@@ -233,7 +233,7 @@ fig_sauropods.update_xaxes(autorange="reversed")
 st.plotly_chart(fig_sauropods, use_container_width=True)
 st.write("I was trying to find out if we would still have large sauropods if the extinction never happened. The chart doesn't indicate their sizes were really dropping towards the end of Cretaceous, but rather that their sizes were fluctuating every xx mln years.")
 
-st.subheader("How T-rexes size compared to other large carnivores?")
+st.subheader("How T-rex's size compared to other large carnivores?")
 theropods = non_0_size_dinos[non_0_size_dinos["type"] == "large theropod"].sort_values("length")
 fig_trex = px.bar(theropods[-10:], x="name", y="length")
 fig_trex["data"][0]["marker"]["color"] = ["red" if fig_data == "tyrannosaurus" else "#636efa" for fig_data in fig_trex["data"][0]["x"]]  # print(fig_trex) # print(fig_trex["data"][0]["marker"]["color"])  #636efa
@@ -250,17 +250,16 @@ discoverers.set_index("Name", inplace=True)
 st.write(discoverers[:10].transpose())
 
 st.subheader("Number of discovered species by fossil age")
-dino_diversity = dino.value_counts("period_to").reset_index()
-dino_diversity = dino_diversity.rename(columns={"period_to": "Fossils age", 0: "Number of species"})
-
+dino_diversity = dino["period_to"].value_counts().reset_index()
+dino_diversity = dino_diversity.rename(columns={"index": "Fossils age", "period_to": "Number of species"})
 fig_diversity = px.scatter(dino_diversity, x="Fossils age", y="Number of species", text="Number of species", size="Number of species", size_max=50, color="Number of species")
 fig_diversity.update_xaxes(autorange="reversed")
 fig_diversity.update_layout(xaxis_title="MLN years ago", yaxis_title="Number of species", showlegend=False)
 st.plotly_chart(fig_diversity, use_container_width=True)
 
 st.subheader("Number of new species discovered by year")
-dino_discoveries = dino.value_counts("discovered").reset_index()
-dino_discoveries = dino_discoveries.rename(columns={"discovered": "Year", 0: "Species"})
+dino_discoveries = dino["discovered"].value_counts().reset_index()
+dino_discoveries = dino_discoveries.rename(columns={"index": "Year", "discovered": "Species"})
 fig_discoveries = px.bar(dino_discoveries, x="Year", y="Species", color="Species")
 fig_discoveries.update_layout(xaxis_title="Year", yaxis_title="Number of discoveries")
 st.plotly_chart(fig_discoveries, use_container_width=True)
@@ -302,3 +301,15 @@ with st.container():
             file_name="dino_df.html",
             mime="text/html",
         )
+
+st.markdown('---')
+# Not a very scientific one, just wanted to see if plotly can animate this. Looks cool! :)
+st.subheader("Lifeline of non-avian dinosaurs")
+dino_lifeline = dino[["period_to"]].groupby("period_to").value_counts()
+dino_lifeline = dino_lifeline.reindex(range(250), fill_value=0).reset_index()  # fill gaps between existing millions of years and fill them with species count of 0
+dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})  # update names
+dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(drop=True)  # reset index so the oldest year is first
+lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
+lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
+lifeline_fig.add_vline(x=64, line_width=2, line_color="red", line_dash="dash", annotation_text="K-Pg Extinction Event")
+st.plotly_chart(lifeline_fig)
