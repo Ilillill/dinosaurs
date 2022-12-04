@@ -9,7 +9,7 @@ import dfprint
 
 # LIVE VERSION OF THIS PROJECT CAN BE FOUND @ https://ilillill-dinosaurs-main-91zl3w.streamlit.app/
 
-non_0_size_dinos = dino[dino["length"] != 0]
+non_0_size_dinos = dino[dino["length"] != 0]  # The 'length' column has some zeros after replacing NA, when calculating sizes I will use this DS
 
 st.set_page_config(layout="wide", page_title="Dinosaurs", page_icon="🦖")
 
@@ -18,12 +18,11 @@ st.markdown(bg_image, unsafe_allow_html=True)
 
 with st.sidebar:
     st.title("DINOSAURS!")
-    dino_selector = st.selectbox("Select species or start typing to search:", dino["name"].unique(), index=3)
+    dino_selector = st.selectbox("Select species or start typing to search:", dino["name"].unique(), index=3)  # Image of the first dino is just a placeholder, so I set the index to a different entry
     selected_dino = dino.loc[dino["name"] == dino_selector]
     if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
     selected_dino_image = selected_dino["image"].to_string().split(" ")[-1]
-    pd.set_option('display.max_colwidth', None)
     st.image(selected_dino_image)
     st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
     st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
@@ -37,8 +36,8 @@ with st.sidebar:
     fig_size_comparison.data[0].x = selected_dino["length"].tolist()
     fig_size_comparison.add_shape(type="line", x0=0, y0=0, x1=1.8, y1=0, line=dict(color="red", width=8,))
     st.plotly_chart(fig_size_comparison, use_container_width=True)
-    st.write("Average human height (red)")
-    st.write("Dinosaur length (blue)")
+    st.text("Average human height (red)")
+    st.text("Dinosaur length (blue)")
 
 dino_time = dino['period_from'].max() - dino['period_to'].min()
 with st.container():
@@ -88,7 +87,6 @@ with st.container():
         groups.set_index("Group", inplace=True)
         st.write(groups)
 
-
 st.subheader("Major groups timeline")
 major_group_ranges = dino.groupby("major_group").agg({"period_to": "min", "period_from": "max"}).reset_index()
 major_group_ranges["delta"] = major_group_ranges["period_to"] - major_group_ranges["period_from"]
@@ -98,13 +96,22 @@ fig_timeline.update_xaxes(autorange="reversed")
 fig_timeline.data[0].x = major_group_ranges.delta.tolist()
 st.plotly_chart(fig_timeline, use_container_width=True)
 
-st.subheader("Major groups distribution")
+st.header("Select group")
 group_selector = st.selectbox("Select group or start typing to search:", dino["major_group"].unique())
 selected_group = dino[dino["major_group"] == group_selector]
+
+st.write(f"{group_selector}: {len(dino[dino['major_group'] == group_selector])} species")
+
+selected_for_sizes = non_0_size_dinos[non_0_size_dinos["major_group"] == group_selector].reset_index(drop=True)
+st.subheader("Sizes in group")
+st.write(f"Largest: {np.round(selected_for_sizes['length'].max(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmax()]['name'].capitalize()}")
+st.write(f"Smallest: {np.round(selected_for_sizes['length'].min(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()]['name'].capitalize()}")
+st.write(f"Average: {np.round(selected_for_sizes['length'].mean(), 1)}m")
+
+st.subheader("Group distribution")
 group_diversity = selected_group.groupby("lived_in").count().reset_index()
 group_diversity["species"] = group_diversity["species"].astype(str)
 color_setting = group_diversity["lived_in"]
-st.write(f"{group_selector}: {len(dino[dino['major_group'] == group_selector])} species")
 if st.checkbox("Show number of species"):
     color_setting = group_diversity["species"]
 fig_gr_loc = px.choropleth(group_diversity, locations=group_diversity["lived_in"], color=color_setting, locationmode="country names", labels={"lived_in": "Location", "species": f"Species of {group_selector} discovered"})
@@ -302,12 +309,16 @@ with st.container():
             mime="text/html",
         )
 
+# This isn't a very scientific chart, just wanted to see if plotly can animate this. Looks cool! :)
+# Unfortunately it will not work on Codio with the installed version of Pandas (1.1.5) (works on my PC and online). Version 1.4.0 is required and I don't know if I am allowed to update modules myself.
+# AttributeError: 'DataFrameGroupBy' object has no attribute 'value_counts'
+# Pandas reference: pandas.core.groupby.DataFrameGroupBy.value_counts - New in version 1.4.0.
+
 st.markdown('---')
-# Not a very scientific one, just wanted to see if plotly can animate this. Looks cool! :)
 st.subheader("Lifeline of non-avian dinosaurs")
 dino_lifeline = dino[["period_to"]].groupby("period_to").value_counts()
 dino_lifeline = dino_lifeline.reindex(range(250), fill_value=0).reset_index()  # fill gaps between existing millions of years and fill them with species count of 0
-dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})  # update names
+dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})
 dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(drop=True)  # reset index so the oldest year is first
 lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
 lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
