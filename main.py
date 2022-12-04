@@ -24,7 +24,6 @@ with st.sidebar:
     if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
     selected_dino_image = selected_dino["image"].to_string().split(" ")
-    pd.set_option('display.max_colwidth', None)
     st.image(selected_dino_image)
     st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
     st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
@@ -39,7 +38,7 @@ with st.sidebar:
     fig_size_comparison.add_shape(type="line", x0=0, y0=0, x1=1.8, y1=0, line=dict(color="red", width=8,))
     st.plotly_chart(fig_size_comparison, use_container_width=True)
     st.text("Average human height (red)")
-    st.text(f"{selected_dino['name'].iloc[0].capitalize()} length (blue)")
+    st.text(f"Dinosaur length (blue)")
 
 dino_time = dino['period_from'].max() - dino['period_to'].min()
 with st.container():
