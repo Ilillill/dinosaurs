@@ -16,6 +16,9 @@ st.set_page_config(layout="wide", page_title="Dinosaurs", page_icon="🦖")
 bg_image = '<style> .stApp {background-image: url("https://raw.githubusercontent.com/Ilillill/projects/main/dinologo_match_light.png");background-position: 95% 10%; background-repeat: no-repeat; background-size: 100px 100px;} </style>'
 st.markdown(bg_image, unsafe_allow_html=True)
 
+images = False  # Sometimes there are problems retrieving images from the original page (https://www.nhm.ac.uk/) so this option is disabled by default. If the problem occurs Streamlit displays error and crashes
+if st.checkbox("Include images"):
+    images = True
 
 with st.sidebar:
     st.title("DINOSAURS!")
@@ -23,8 +26,9 @@ with st.sidebar:
     selected_dino = dino.loc[dino["name"] == dino_selector]
     if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
-    selected_dino_image = selected_dino["image"].to_string().split(" ")
-    st.image(selected_dino_image)
+    if images:
+        selected_dino_image = selected_dino["image"].to_string().split(" ")
+        st.image(selected_dino_image)
     st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
     st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
     st.write(f"Size: {selected_dino['length'].iloc[0]}m")
@@ -127,7 +131,8 @@ if st.checkbox("Show dinosaurs in this group"):
             col = [im_col1, im_col2, im_col3, im_col4, im_col5]
             for ch in chunk:
                 with col[i]:
-                    st.image(ch, width=150)
+                    if images:
+                        st.image(ch, width=150)
                     st.write(dino["name"].loc[dino["image"] == ch].iloc[0].capitalize())
                     i += 1
 
