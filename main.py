@@ -323,13 +323,13 @@ with st.container():
 # AttributeError: 'DataFrameGroupBy' object has no attribute 'value_counts'
 # Pandas reference: pandas.core.groupby.DataFrameGroupBy.value_counts - New in version 1.4.0.
 
-# st.markdown('---')
-# st.subheader("Lifeline of non-avian dinosaurs")
-# dino_lifeline = dino[["period_to"]].groupby("period_to").value_counts()
-# dino_lifeline = dino_lifeline.reindex(range(250), fill_value=0).reset_index()  # fill gaps between existing millions of years and fill them with species count of 0
-# dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})
-# dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(drop=True)  # reset index so the oldest year is first
-# lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
-# lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
-# lifeline_fig.add_vline(x=64, line_width=2, line_color="red", line_dash="dash", annotation_text="K-Pg Extinction Event")
-# st.plotly_chart(lifeline_fig, use_container_width=True)
+st.markdown('---')
+st.subheader("Lifeline of non-avian dinosaurs")
+dino_lifeline = dino[["period_to"]].groupby("period_to").value_counts()
+dino_lifeline = dino_lifeline.reindex(range(250), fill_value=0).reset_index()  # fill gaps between existing millions of years and fill them with species count of 0
+dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})
+dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(drop=True)  # reset index so the oldest year is first
+lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
+lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
+lifeline_fig.add_vline(x=64, line_width=2, line_color="red", line_dash="dash", annotation_text="K-Pg Extinction Event")
+st.plotly_chart(lifeline_fig, use_container_width=True)
