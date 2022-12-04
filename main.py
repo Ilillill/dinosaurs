@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+import streamlit.errors
 
 from dataset import dino
 import dfprint
@@ -16,7 +17,7 @@ st.set_page_config(layout="wide", page_title="Dinosaurs", page_icon="🦖")
 bg_image = '<style> .stApp {background-image: url("https://raw.githubusercontent.com/Ilillill/projects/main/dinologo_match_light.png");background-position: 95% 10%; background-repeat: no-repeat; background-size: 100px 100px;} </style>'
 st.markdown(bg_image, unsafe_allow_html=True)
 
-images = False  # Sometimes there are problems retrieving images from the original page (https://www.nhm.ac.uk/) so this option is disabled by default. If the problem occurs Streamlit displays error and crashes
+images = False
 if st.checkbox("Include images"):
     images = True
 
@@ -27,7 +28,7 @@ with st.sidebar:
     if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
     if images:
-        selected_dino_image = selected_dino["image"].to_string().split(" ")
+        selected_dino_image = selected_dino["image"].to_string().split(" ")[-1]
         st.image(selected_dino_image)
     st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
     st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
@@ -42,7 +43,7 @@ with st.sidebar:
     fig_size_comparison.add_shape(type="line", x0=0, y0=0, x1=1.8, y1=0, line=dict(color="red", width=8,))
     st.plotly_chart(fig_size_comparison, use_container_width=True)
     st.text("Average human height (red)")
-    st.text(f"Dinosaur length (blue)")
+    st.text(f"{selected_dino['name'].iloc[0].capitalize()} length (blue)")
 
 dino_time = dino['period_from'].max() - dino['period_to'].min()
 with st.container():
@@ -109,9 +110,15 @@ st.write(f"{group_selector}: {len(dino[dino['major_group'] == group_selector])} 
 
 selected_for_sizes = non_0_size_dinos[non_0_size_dinos["major_group"] == group_selector].reset_index(drop=True)
 st.subheader("Sizes in group")
-st.write(f"Largest: {np.round(selected_for_sizes['length'].max(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmax()]['name'].capitalize()}")
-st.write(f"Smallest: {np.round(selected_for_sizes['length'].min(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()]['name'].capitalize()}")
+if st.checkbox(f"Largest: {np.round(selected_for_sizes['length'].max(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmax()]['name'].capitalize()}"):
+    st.text(selected_for_sizes.iloc[selected_for_sizes['length'].idxmax()][['name', 'species', 'type', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered']].to_string())
+if st.checkbox(f"Smallest: {np.round(selected_for_sizes['length'].min(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()]['name'].capitalize()}"):
+    st.text(selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()][['name', 'species', 'type', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered']].to_string())
 st.write(f"Average: {np.round(selected_for_sizes['length'].mean(), 1)}m")
+
+# st.write(f"Largest: {np.round(selected_for_sizes['length'].max(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmax()]['name'].capitalize()}")
+# st.write(f"Smallest: {np.round(selected_for_sizes['length'].min(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()]['name'].capitalize()}")
+
 
 st.subheader("Group distribution")
 group_diversity = selected_group.groupby("lived_in").count().reset_index()
@@ -123,18 +130,20 @@ fig_gr_loc = px.choropleth(group_diversity, locations=group_diversity["lived_in"
 st.plotly_chart(fig_gr_loc, use_container_width=True)
 
 if st.checkbox("Show dinosaurs in this group"):
-    chunks = [selected_group["image"].iloc[x:x+5] for x in range(0, len(selected_group), 5)]
-    for chunk in chunks:
-        i = 0
-        with st.container():
-            im_col1, im_col2, im_col3, im_col4, im_col5 = st.columns(5)
-            col = [im_col1, im_col2, im_col3, im_col4, im_col5]
-            for ch in chunk:
-                with col[i]:
-                    if images:
+    st.write(selected_group[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
+    if images:
+        st.subheader("Images")
+        chunks = [selected_group["image"].iloc[x:x+5] for x in range(0, len(selected_group), 5)]
+        for chunk in chunks:
+            i = 0
+            with st.container():
+                im_col1, im_col2, im_col3, im_col4, im_col5 = st.columns(5)
+                col = [im_col1, im_col2, im_col3, im_col4, im_col5]
+                for ch in chunk:
+                    with col[i]:
                         st.image(ch, width=150)
-                    st.write(dino["name"].loc[dino["image"] == ch].iloc[0].capitalize())
-                    i += 1
+                        st.write(dino["name"].loc[dino["image"] == ch].iloc[0].capitalize())
+                        i += 1
 
 st.markdown("---")
 
