@@ -24,6 +24,7 @@ with st.sidebar:
     if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
     selected_dino_image = selected_dino["image"].to_string().split(" ")
+    pd.set_option('display.max_colwidth', None)
     st.image(selected_dino_image)
     st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
     st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
