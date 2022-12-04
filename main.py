@@ -16,13 +16,14 @@ st.set_page_config(layout="wide", page_title="Dinosaurs", page_icon="🦖")
 bg_image = '<style> .stApp {background-image: url("https://raw.githubusercontent.com/Ilillill/projects/main/dinologo_match_light.png");background-position: 95% 10%; background-repeat: no-repeat; background-size: 100px 100px;} </style>'
 st.markdown(bg_image, unsafe_allow_html=True)
 
+
 with st.sidebar:
     st.title("DINOSAURS!")
     dino_selector = st.selectbox("Select species or start typing to search:", dino["name"].unique(), index=3)  # Image of the first dino is just a placeholder, so I set the index to a different entry
     selected_dino = dino.loc[dino["name"] == dino_selector]
     if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
-    selected_dino_image = selected_dino["image"].to_string().split(" ")[-1]
+    selected_dino_image = selected_dino["image"].to_string().split(" ")
     st.image(selected_dino_image)
     st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
     st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
@@ -37,7 +38,7 @@ with st.sidebar:
     fig_size_comparison.add_shape(type="line", x0=0, y0=0, x1=1.8, y1=0, line=dict(color="red", width=8,))
     st.plotly_chart(fig_size_comparison, use_container_width=True)
     st.text("Average human height (red)")
-    st.text("Dinosaur length (blue)")
+    st.text(f"{selected_dino['name'].iloc[0].capitalize()} length (blue)")
 
 dino_time = dino['period_from'].max() - dino['period_to'].min()
 with st.container():
@@ -58,11 +59,11 @@ st.write(f"Non-avian dinosaurs existed for **{dino_time} million** years.")
 oldest_fossil = dino["period_from"].max()
 oldest_fossil_df = dino[dino["period_from"] == oldest_fossil]  # dino.iloc[dino["period_from"].idxmax()] returns only one entry
 st.write(f"The oldest fossils are **{oldest_fossil} mln** years old:")
-st.write(oldest_fossil_df)
+st.write(oldest_fossil_df[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
 species_kp = dino[dino["period_to"] < 67]
 st.write(f"**{len(species_kp['name'])}** of known species were present during the K-P Extinction Event:")
-st.write(species_kp)
+st.write(species_kp[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
 st.subheader("All dinosaurs timeline & sizes")
 fig_all = px.scatter(non_0_size_dinos, x=non_0_size_dinos["period_to"], y=non_0_size_dinos["length"], size=non_0_size_dinos["length"], color="name", labels={"name": "Species", "period_to": "Mln years ago", "length": "Size"})
@@ -190,24 +191,24 @@ st.write(f"AVERAGE DINOSAUR: {np.round(average_dinosaur, 1)}m")
 largest_dinosaur = non_0_size_dinos["length"].max()
 largest_dinosaur_df = dino[dino["length"] == largest_dinosaur]
 st.write(f"LARGEST DINOSAUR: {largest_dinosaur}m")
-st.write(largest_dinosaur_df)
+st.write(largest_dinosaur_df[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
 smallest_dinosaur = non_0_size_dinos["length"].min()
 smallest_dinosaur_df = dino[dino["length"] == smallest_dinosaur]
 st.write(f"SMALLEST DINOSAUR: {smallest_dinosaur}m")
-st.write(smallest_dinosaur_df)
+st.write(smallest_dinosaur_df[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
 theropods = dino[dino["taxonomy"].str.contains("Theropoda")]
 largest_theropod = theropods["length"].max()
 largest_theropod_df = theropods[theropods["length"] == largest_theropod]
 st.write(f"LARGEST THEROPOD {largest_theropod}m (was it the T-Rex??)")
-st.write(largest_theropod_df)
+st.write(largest_theropod_df[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
 dromaeosaurs = dino[dino["taxonomy"].str.contains("Paraves")]
 largest_dromaeosaur = dromaeosaurs["length"].max()
 largest_dromaeosaur_df = dromaeosaurs[dromaeosaurs["length"] == largest_dromaeosaur]
 st.write(f"LARGEST DROMAEOSAUR {largest_dromaeosaur}m:")
-st.write(largest_dromaeosaur_df)
+st.write(largest_dromaeosaur_df[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
 st.subheader("Filter dinosaurs by size")
 size_slider = st.slider(label="Size in meters", min_value=0, max_value=int(largest_dinosaur), value=10, step=1)
@@ -216,7 +217,7 @@ if dino_by_size.empty:
     st.write(f"There are no know {size_slider}m long dinosaurs")
 else:
     st.write(f"{len(dino_by_size)} species found with sizes between {size_slider}m and {size_slider+1}m:")
-    st.write(dino_by_size)
+    st.write(dino_by_size[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
 st.subheader("Dinosaur sizes for each major group")
 families_grouped = non_0_size_dinos.groupby("major_group")
@@ -323,4 +324,4 @@ dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(
 lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
 lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
 lifeline_fig.add_vline(x=64, line_width=2, line_color="red", line_dash="dash", annotation_text="K-Pg Extinction Event")
-st.plotly_chart(lifeline_fig)
+st.plotly_chart(lifeline_fig, use_container_width=True)
