@@ -1,9 +1,7 @@
 import numpy as np
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-import streamlit.errors
 
 from dataset import dino
 import dfprint
@@ -28,7 +26,7 @@ with st.sidebar:
     if st.button("Pick randomly"):
         selected_dino = dino.sample(n=1)
     if images:
-        selected_dino_image = selected_dino["image"].to_string().split(" ")[-1]
+        selected_dino_image = selected_dino["image"].iloc[0]
         st.image(selected_dino_image)
     st.write(f"Name: {selected_dino['name'].iloc[0].capitalize()} {selected_dino['species'].iloc[0].capitalize()}")
     st.write(f"Type: {selected_dino['diet'].iloc[0].capitalize()} {selected_dino['type'].iloc[0].capitalize()}")
@@ -115,10 +113,6 @@ if st.checkbox(f"Largest: {np.round(selected_for_sizes['length'].max(), 1)}m {se
 if st.checkbox(f"Smallest: {np.round(selected_for_sizes['length'].min(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()]['name'].capitalize()}"):
     st.text(selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()][['name', 'species', 'type', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered']].to_string())
 st.write(f"Average: {np.round(selected_for_sizes['length'].mean(), 1)}m")
-
-# st.write(f"Largest: {np.round(selected_for_sizes['length'].max(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmax()]['name'].capitalize()}")
-# st.write(f"Smallest: {np.round(selected_for_sizes['length'].min(), 1)}m {selected_for_sizes.iloc[selected_for_sizes['length'].idxmin()]['name'].capitalize()}")
-
 
 st.subheader("Group distribution")
 group_diversity = selected_group.groupby("lived_in").count().reset_index()
