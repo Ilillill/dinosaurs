@@ -8,7 +8,7 @@ import dfprint
 
 # LIVE VERSION OF THIS PROJECT CAN BE FOUND @ https://ilillill-dinosaurs-main-91zl3w.streamlit.app/
 
-non_0_size_dinos = dino[dino["length"] != 0]  # The 'length' column has some zeros after replacing NA, when calculating sizes I will use this DS
+non_0_size_dinos = dino[dino["length"] != 0]  # There are 0 values in the 'length' column, when calculating sizes I will use this DataFrame instead of the main one
 
 st.set_page_config(layout="wide", page_title="Dinosaurs", page_icon="🦖")
 
@@ -123,7 +123,7 @@ if st.checkbox("Show number of species"):
 fig_gr_loc = px.choropleth(group_diversity, locations=group_diversity["lived_in"], color=color_setting, locationmode="country names", labels={"lived_in": "Location", "species": f"Species of {group_selector} discovered"})
 st.plotly_chart(fig_gr_loc, use_container_width=True)
 
-if st.checkbox("Show dinosaurs in this group"):
+if st.checkbox("Show species in this group"):
     st.write(selected_group[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
     if images:
         st.subheader("Images")
@@ -218,16 +218,16 @@ largest_dromaeosaur_df = dromaeosaurs[dromaeosaurs["length"] == largest_dromaeos
 st.write(f"LARGEST DROMAEOSAUR {largest_dromaeosaur}m:")
 st.write(largest_dromaeosaur_df[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
-st.subheader("Filter dinosaurs by size")
+st.subheader("Filter species by size")
 size_slider = st.slider(label="Size in meters", min_value=0, max_value=int(largest_dinosaur), value=10, step=1)
 dino_by_size = non_0_size_dinos[non_0_size_dinos["length"].between(size_slider, size_slider+0.99)]
 if dino_by_size.empty:
     st.write(f"There are no know {size_slider}m long dinosaurs")
 else:
-    st.write(f"{len(dino_by_size)} species found with sizes between {size_slider}m and {size_slider+1}m:")
+    st.write(f"{size_slider} m - {size_slider+1} m: {len(dino_by_size)} species found")
     st.write(dino_by_size[['name', 'species', 'type', 'major_group', 'length', 'diet', 'period', 'period_from', 'period_to', 'lived_in', 'discovered', 'named_by']])
 
-st.subheader("Dinosaur sizes for each major group")
+st.subheader("Sizes in each major group")
 families_grouped = non_0_size_dinos.groupby("major_group")
 largest_in_family = families_grouped["length"].max().reset_index()
 average_in_family = families_grouped["length"].mean().reset_index()
@@ -265,7 +265,7 @@ discoverers = discoverers.rename(columns={"index": "Name", "named_by": "Species 
 discoverers.set_index("Name", inplace=True)
 st.write(discoverers[:10].transpose())
 
-st.subheader("Number of discovered species by fossil age")
+st.subheader("Number of species by fossil age")
 dino_diversity = dino["period_to"].value_counts().reset_index()
 dino_diversity = dino_diversity.rename(columns={"index": "Fossils age", "period_to": "Number of species"})
 fig_diversity = px.scatter(dino_diversity, x="Fossils age", y="Number of species", text="Number of species", size="Number of species", size_max=50, color="Number of species")
@@ -273,7 +273,7 @@ fig_diversity.update_xaxes(autorange="reversed")
 fig_diversity.update_layout(xaxis_title="MLN years ago", yaxis_title="Number of species", showlegend=False)
 st.plotly_chart(fig_diversity, use_container_width=True)
 
-st.subheader("Number of new species discovered by year")
+st.subheader("Number of discoveries by year")
 dino_discoveries = dino["discovered"].value_counts().reset_index()
 dino_discoveries = dino_discoveries.rename(columns={"index": "Year", "discovered": "Species"})
 fig_discoveries = px.bar(dino_discoveries, x="Year", y="Species", color="Species")
@@ -318,18 +318,18 @@ with st.container():
             mime="text/html",
         )
 
-# This isn't a very scientific chart, just wanted to see if plotly can animate this. Looks cool! :)
+# This isn't a very scientific chart, I just wanted to see if plotly can animate this. Looks cool! :)
 # Unfortunately it will not work on Codio with the installed version of Pandas (1.1.5) (works on my PC and online). Version 1.4.0 is required and I don't know if I am allowed to update modules myself.
 # AttributeError: 'DataFrameGroupBy' object has no attribute 'value_counts'
 # Pandas reference: pandas.core.groupby.DataFrameGroupBy.value_counts - New in version 1.4.0.
 
-st.markdown('---')
-st.subheader("Lifeline of non-avian dinosaurs")
-dino_lifeline = dino[["period_to"]].groupby("period_to").value_counts()
-dino_lifeline = dino_lifeline.reindex(range(250), fill_value=0).reset_index()  # fill gaps between existing millions of years and fill them with species count of 0
-dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})
-dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(drop=True)  # reset index so the oldest year is first
-lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
-lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
-lifeline_fig.add_vline(x=64, line_width=2, line_color="red", line_dash="dash", annotation_text="K-Pg Extinction Event")
-st.plotly_chart(lifeline_fig, use_container_width=True)
+# st.markdown('---')
+# st.subheader("Lifeline of non-avian dinosaurs")
+# dino_lifeline = dino[["period_to"]].groupby("period_to").value_counts()
+# dino_lifeline = dino_lifeline.reindex(range(250), fill_value=0).reset_index()  # fill gaps between existing millions of years and fill them with species count of 0
+# dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})
+# dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(drop=True)  # reset index so the oldest year is first
+# lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
+# lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
+# lifeline_fig.add_vline(x=64, line_width=2, line_color="red", line_dash="dash", annotation_text="K-Pg Extinction Event")
+# st.plotly_chart(lifeline_fig, use_container_width=True)
