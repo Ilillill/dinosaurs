@@ -88,7 +88,7 @@ with st.container():
     with gr_col2:
         groups = dino["major_group"].value_counts().reset_index()
         groups = groups.rename(columns={"index": "Group", "major_group": "Species"})
-        groups.set_index("Group", inplace=True)
+        # groups.set_index("Group", inplace=True)
         st.write(groups)
 
 st.subheader("Major groups timeline")
@@ -262,12 +262,11 @@ st.markdown(f"<h1 style='text-align: center;'>Discoveries</h1>", unsafe_allow_ht
 st.write("Top 10 people with most discoveries")
 discoverers = dino["named_by"].value_counts().reset_index()
 discoverers = discoverers.rename(columns={"index": "Name", "named_by": "Species discovered"})
-discoverers.set_index("Name", inplace=True)
 st.write(discoverers[:10].transpose())
 
 st.subheader("Number of species by fossil age")
 dino_diversity = dino["period_to"].value_counts().reset_index()
-dino_diversity = dino_diversity.rename(columns={"index": "Fossils age", "period_to": "Number of species"})
+dino_diversity = dino_diversity.rename(columns={"period_to": "Fossils age", "count": "Number of species"})
 fig_diversity = px.scatter(dino_diversity, x="Fossils age", y="Number of species", text="Number of species", size="Number of species", size_max=50, color="Number of species")
 fig_diversity.update_xaxes(autorange="reversed")
 fig_diversity.update_layout(xaxis_title="MLN years ago", yaxis_title="Number of species", showlegend=False)
@@ -275,7 +274,7 @@ st.plotly_chart(fig_diversity, use_container_width=True)
 
 st.subheader("Number of discoveries by year")
 dino_discoveries = dino["discovered"].value_counts().reset_index()
-dino_discoveries = dino_discoveries.rename(columns={"index": "Year", "discovered": "Species"})
+dino_discoveries = dino_discoveries.rename(columns={"discovered": "Year", "count": "Species"})
 fig_discoveries = px.bar(dino_discoveries, x="Year", y="Species", color="Species")
 fig_discoveries.update_layout(xaxis_title="Year", yaxis_title="Number of discoveries")
 st.plotly_chart(fig_discoveries, use_container_width=True)
@@ -327,7 +326,7 @@ st.markdown('---')
 st.subheader("Lifeline of non-avian dinosaurs")
 dino_lifeline = dino[["period_to"]].groupby("period_to").value_counts()
 dino_lifeline = dino_lifeline.reindex(range(250), fill_value=0).reset_index()  # fill gaps between existing millions of years and fill them with species count of 0
-dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", 0: "species"})
+dino_lifeline = dino_lifeline.rename(columns={"period_to": "years", "count": "species"})
 dino_lifeline = dino_lifeline.sort_values("years", ascending=False).reset_index(drop=True)  # reset index so the oldest year is first
 lifeline_fig = px.scatter(dino_lifeline, x="years", y="species", animation_frame="years", range_x=[250, 0], range_y=[-4, 27], color_discrete_sequence=["red"], labels={"years": "Mln years ago", "species": "Number of species present"})
 lifeline_fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 40
